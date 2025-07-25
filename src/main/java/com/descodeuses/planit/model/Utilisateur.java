@@ -14,7 +14,7 @@ public class Utilisateur {
     private Long id;
     private String username;
     private String password;
-    private Integer role;
+    private String role;
 
     public Long getId() {
         return id;
@@ -41,11 +41,11 @@ public class Utilisateur {
     }
 
     
-    public Integer getRole() {
+    public String getRole() {
         return role;
     }
 
-    public void setRole(Integer role) {
+    public void setRole(String role) {
         this.role = role;
     }
 

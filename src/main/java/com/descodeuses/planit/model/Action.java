@@ -31,36 +31,7 @@ public class Action {
     @Column(length=255)
     private String priorite;
 
-    @ManyToMany
-    @JoinTable(
-        name="todo_contact",
-        joinColumns=@JoinColumn(name="todo_id"),
-        inverseJoinColumns=@JoinColumn(name="contact_id")
-    )
-
-    public Set<Contact> members = new HashSet<>();
-
-    public Set<Contact> getMembers(){
-        return members;
-    }
-
-    public void setMembers(Set<Contact> members){
-        this.members = members;
-    }
-
-    // --------Many to one -------------------
-    
-    @ManyToOne
-    @JoinColumn(name="projet_id", referencedColumnName="id")
-    private Projet projet;
-
-    public Projet getProjet() {
-        return projet;
-    }
-
-    public void setProjet(Projet projet) {
-        this.projet = projet;
-    }
+    // ---------Todo--------------------
 
     public Long getId() {
         return id;
@@ -106,4 +77,51 @@ public class Action {
     public void setPriorite(String priorite) {
         this.priorite = priorite;
     }
+
+    // -------------------todo & contact---------
+    @ManyToMany
+    @JoinTable(
+        name="todo_contact",
+        joinColumns=@JoinColumn(name="todo_id"),
+        inverseJoinColumns=@JoinColumn(name="contact_id")
+    )
+
+    public Set<Contact> members = new HashSet<>();
+
+    public Set<Contact> getMembers(){
+        return members;
+    }
+
+    public void setMembers(Set<Contact> members){
+        this.members = members;
+    }
+
+    // --------Many to one -------------------
+    
+    @ManyToOne
+    @JoinColumn(name="projet_id", referencedColumnName="id")
+    private Projet projet;
+
+    public Projet getProjet() {
+        return projet;
+    }
+
+    public void setProjet(Projet projet) {
+        this.projet = projet;
+    }
+
+    // ---------user id-------------
+    @ManyToOne
+    @JoinColumn(name="user_id", referencedColumnName="id")
+    private Utilisateur user;
+
+    public Utilisateur getUser() {
+        return user;
+    }
+
+    public void setUser(Utilisateur user) {
+        this.user = user;
+    }
+
+    
 }

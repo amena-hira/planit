@@ -7,15 +7,20 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.descodeuses.planit.dto.ActionDTO;
 import com.descodeuses.planit.model.Action;
 import com.descodeuses.planit.model.Contact;
 import com.descodeuses.planit.model.Projet;
+import com.descodeuses.planit.model.Utilisateur;
 import com.descodeuses.planit.repository.ActionRepository;
 import com.descodeuses.planit.repository.ContactRepository;
 import com.descodeuses.planit.repository.ProjetRepository;
+import com.descodeuses.planit.repository.UserRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -25,11 +30,13 @@ public class ActionService {
     private final ActionRepository repository;
     private final ContactRepository contactRepository;
     private final ProjetRepository projetRepository;
+    private final UserRepository userRepository;
 
-    public ActionService(ActionRepository repository, ContactRepository contactRepository, ProjetRepository projetRepository){
+    public ActionService(ActionRepository repository, ContactRepository contactRepository, ProjetRepository projetRepository, UserRepository userRepository){
         this.repository = repository;
         this.contactRepository = contactRepository;
         this.projetRepository = projetRepository;
+        this.userRepository = userRepository;
     }
 
     private ActionDTO convertToDTO(Action action){
@@ -48,6 +55,7 @@ public class ActionService {
         .collect(Collectors.toSet());
 
         dto.setMemberIds(memberIds);
+        dto.setUserId(action.getUser() != null ? action.getUser().getId() : null);
         return dto;
     }
     
@@ -69,7 +77,10 @@ public class ActionService {
     }
 
     public List<ActionDTO> getAllActions(){
-        List<Action> actions = repository.findAll();
+        UserDetails userDetails = (UserDetails)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = userDetails.getUsername();
+        Utilisateur user = userRepository.findByUsername(username).orElseThrow(()->new EntityNotFoundException("User not found"));
+        List<Action> actions = repository.findByUserId(user.getId());
         //Declarer une variable liste de action DTO
         List<ActionDTO> actionDTOList = new ArrayList<>();
         //Faire boucle sur la liste action
@@ -93,11 +104,18 @@ public class ActionService {
     }
 
     public ActionDTO postAction(ActionDTO dto){
+        // UserDetails userDetails = (userD)
+        UserDetails userDetails = (UserDetails)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = userDetails.getUsername();
+        Utilisateur user = userRepository.findByUsername(username).orElseThrow(()->new EntityNotFoundException("User not found"));
+
         // Convertir le DTO en entité
         //entité = convertirVersEntité(dto)
         Set<Contact> contacts = new HashSet<>(contactRepository.findAllById(dto.getMemberIds()));
 
         Action action = convertToEntity(dto,contacts);
+        action.setUser(user);
+        
 
         // Sauvegarder l'entité dans la base de données
         //entitéEnregistrée = référentiel.sauvegarder(entité)

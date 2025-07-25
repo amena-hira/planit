@@ -30,6 +30,16 @@ public class ActionDTO {
         this.projetId = projetId;
     }
 
+    private Long userId;
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
     public ActionDTO(Long id,String title,boolean completed,LocalDate dueDate,String priorite){
         this.id = id;
         this.title = title;
@@ -77,4 +87,10 @@ public class ActionDTO {
     public void setPriorite(String priorite) {
         this.priorite = priorite;
     }
+
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
+    }
+
+    
 }
