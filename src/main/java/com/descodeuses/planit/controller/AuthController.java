@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,8 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.descodeuses.planit.dto.AuthRequest;
 import com.descodeuses.planit.dto.AuthResponse;
 import com.descodeuses.planit.model.Utilisateur;
+import com.descodeuses.planit.repository.UserRepository;
 import com.descodeuses.planit.security.JwtUtil;
+import com.descodeuses.planit.service.LogDocumentService;
 import com.descodeuses.planit.service.UserService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 
 @RestController
@@ -32,18 +35,38 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private LogDocumentService logService;
+
+    // @Autowired
+    // private UserDetailsService userDetailsService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private UserRepository userRepo;
+
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
+    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request, HttpServletRequest httpRequest) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
                 
         String token = jwtUtil.generateToken(request.getUsername());
+        // UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
+        Utilisateur user = userRepo.findByUsername(request.getUsername()).orElse(null);
+
+        if (token!= null) {
+            System.out.println("User " + request.getUsername() + " logged in successfully.");
+            logService.addLog("User " + request.getUsername() + " logged in successfully.", httpRequest, request, user);
+        } else {
+            logService.addLog("Failed login attempt for user " + request.getUsername() + ".", httpRequest, request, user);
+        }
 
         return ResponseEntity.ok(new AuthResponse(token));
     }
 
-    @Autowired
-    private UserService userService;
+    
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody Utilisateur utilisateur) {
         System.out.println("username: "+utilisateur.getUsername()+" password: "+ utilisateur.getPassword());

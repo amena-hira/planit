@@ -10,15 +10,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.descodeuses.planit.dto.ActionDTO;
 import com.descodeuses.planit.model.Action;
 import com.descodeuses.planit.service.ActionService;
-import com.descodeuses.planit.dto.ActionDTO;
+import com.descodeuses.planit.service.LogDocumentService;
 
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PutMapping;
+import jakarta.servlet.http.HttpServletRequest;
 
 
 
@@ -31,8 +33,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 public class ActionController {
     private final ActionService service;
 
-    public ActionController(ActionService service){
+   
+    private final LogDocumentService logService;
+
+    public ActionController(ActionService service, LogDocumentService logService){
         this.service = service;
+        this.logService = logService;
     }
 
     @GetMapping("/action/postgresql")
@@ -46,8 +52,9 @@ public class ActionController {
         return new ResponseEntity<ActionDTO>(action, HttpStatus.OK);
     }
     @PostMapping("/action/postgresql")
-    public ResponseEntity<ActionDTO> createAction(@RequestBody ActionDTO requestDTO) {       
+    public ResponseEntity<ActionDTO> createAction(@RequestBody ActionDTO requestDTO, HttpServletRequest httpRequest) {       
         ActionDTO createdDTO = service.postAction(requestDTO);
+        logService.addLog("Action Created", httpRequest, createdDTO);
         return new ResponseEntity<>(createdDTO, HttpStatus.CREATED);
     }
 

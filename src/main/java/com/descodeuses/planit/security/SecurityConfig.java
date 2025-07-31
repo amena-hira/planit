@@ -1,9 +1,9 @@
 package com.descodeuses.planit.security;
 
-
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,6 +22,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+    // factoriser
+    @Value("${allowCorsOrigin}")
+    private String allowCorsOrigin;
 
     @Autowired
     private JwtFilter jwtFilter; // Injection du filtre JWT personnalisé
@@ -65,6 +68,7 @@ public class SecurityConfig {
     @Bean
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of(allowCorsOrigin));//factoriser
         config.setAllowedOrigins(List.of("http://localhost:4200", "http://localhost:3000", "http://localhost:54872"));
         // Origines autorisées (frontend local)
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
