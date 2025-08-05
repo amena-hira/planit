@@ -69,7 +69,6 @@ public class SecurityConfig {
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(allowCorsOrigin));//factoriser
-        config.setAllowedOrigins(List.of("http://localhost:4200", "http://localhost:3000", "http://localhost:54872"));
         // Origines autorisées (frontend local)
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         // Méthodes HTTP autorisées
